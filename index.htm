@@ -1,0 +1,121 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="static/bootstrap.css">
+		<meta charset="utf-8">
+		<script src="static/jquery.js"></script>
+		<title>Chart Client</title>
+	</head>
+	<body class="container text-center">
+		<h1>Chart Client</h1>
+		<form id="form" class="form-horizontal">
+			<h3><span class="label label-success full-width">Settings</span></h3>
+			<div class="form-group container">
+				<div class="row">
+					<div class="col-md-4">
+						<label class="control-label" for="title">Title</label>
+						<input id="title" class="form-control" type="text" value="My Chart">
+					</div>
+					<div class="col-md-4">
+						<label class="control-label" for="resolution">Color</label>
+						<input id="color" class="form-control" type="text" value="Black">
+					</div>
+					<div class="col-md-4">
+						<label class="control-label" for="height">Upper Limit</label>
+						<input id="limit" class="form-control" type="number" value="100">
+					</div>
+				</div>
+			</div>
+			<h3><span class="label label-info full-width">Data</span></h3>
+			<div class="form-group container">
+				<div id="dataInputContainer" class="row">
+					<div class="col-md-3">
+						<label for="A" class="control-label">A</label>
+						<input id="A" class="form-control" type="number" value=1>
+					</div>
+					<div class="col-md-3">
+						<label for="B" class="control-label">B</label>
+						<input id="B" class="form-control" type="number" value=1>
+					</div>
+					<div class="col-md-3">
+						<label for="C" class="control-label">C</label>
+						<input id="C" class="form-control" type="number" value=1>
+					</div>
+					<div class="col-md-3">
+						<label for="D" class="control-label">D</label>
+						<input id="D" class="form-control" type="number" value=1>
+					</div>
+				</div>
+			</div>
+			<div class="form-group container">
+				<div class="row">
+					<div class="col-md-6">
+						<button id="addMore" class="btn btn-default full-width" type="button">Add More Data</button>
+					</div>
+					<div class="col-md-6">
+						<button class="btn btn-primary full-width" type="submit">Submit</button>
+					</div>
+				</div>
+			</div>
+		</form>
+		<h3><span class="label label-warning full-width">Chart</span></h3>
+		<img id="image" src="">
+	</body>
+	<div id="dataInput" class="hidden">
+		<div class="col-md-3">
+			<label for="" class="control-label"></label>
+			<input id="" class="form-control" type="number" value=1>
+		</div>
+	</div>
+</html>
+<style>
+	.full-width{
+		display:block;
+		margin:10px 0;
+		padding:10px;
+		width:100%;
+	}
+	img{
+		border:5px dashed grey;
+		margin-bottom:10px;
+	}
+</style>
+<script>
+	$(function(){
+		var dataInput=$($("#dataInput").html().trim()),
+			dataInputChar="D";
+		$("#addMore").click(function(){
+			if(dataInputChar=="Z"){
+				return false;
+			}
+			dataInputChar=String.fromCharCode(dataInputChar.charCodeAt(0)+1);
+			var input=dataInput.clone();
+			input.find("label").attr("for",dataInputChar).text(dataInputChar);
+			input.find("input").attr("id",dataInputChar);
+			input.appendTo("#dataInputContainer");
+		});
+		$("#form").submit(function(){
+			dataInputData=[];
+			$("#dataInputContainer input").each(function(){
+				var data={};
+				data["key"]=$(this).attr("id");
+				data["value"]=$(this).val().trim();
+				dataInputData.push(data);
+			});
+			$.ajax({
+				url:"http://localhost:2000/request",
+				jsonp:"callback",
+				dataType:"jsonp",
+				data:{
+					title:$("#title").val().trim(),
+					color:$("#color").val().trim().toLowerCase(),
+					limit:$("#limit").val().trim(),
+					data:dataInputData
+				}
+			});
+			return false;
+		});
+	});
+	function callback(json){
+		$("#image").attr("src","http://localhost:2000/"+json.src);
+	};
+</script>
